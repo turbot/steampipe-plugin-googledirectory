@@ -1,6 +1,6 @@
 # Table: googledirectory_user
 
-Query information about users defined in the Google Workspace.
+Query information about users defined in the Google Workspace directory.
 
 ## Examples
 
