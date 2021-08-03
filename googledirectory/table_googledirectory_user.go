@@ -31,18 +31,6 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Name.FullName"),
 			},
 			{
-				Name:        "given_name",
-				Description: "The user's first name.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name.GivenName"),
-			},
-			{
-				Name:        "family_name",
-				Description: "The user's last name.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name.FamilyName"),
-			},
-			{
 				Name:        "id",
 				Description: "The unique ID for the user.",
 				Type:        proto.ColumnType_STRING,
@@ -50,6 +38,11 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 			{
 				Name:        "primary_email",
 				Description: "Specifies the user's primary email address.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account users.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -66,11 +59,6 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Name:        "is_delegated_admin",
 				Description: "Indicates whether the user is a delegated administrator, or not.",
 				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "customer_id",
-				Description: "The customer ID to retrieve all account users.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "suspended",
@@ -102,6 +90,23 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Name:        "etag",
 				Description: "Specifies the etag of the resource.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "family_name",
+				Description: "The user's last name.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name.FamilyName"),
+			},
+			{
+				Name:        "gender",
+				Description: "The user's gender.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "given_name",
+				Description: "The user's first name.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name.GivenName"),
 			},
 			{
 				Name:        "hash_function",
@@ -176,8 +181,18 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "addresses",
+				Description: "A list of the user's addresses.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "aliases",
 				Description: "A list of the user's alias email addresses.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "custom_schemas",
+				Description: "Custom fields of the user.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -186,8 +201,68 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "external_ids",
+				Description: "A list of external IDs for the user, such as an employee or network ID.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "ims",
+				Description: "The user's Instant Messenger (IM) accounts.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "keywords",
+				Description: "The user's keywords.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "languages",
+				Description: "The user's languages.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "locations",
+				Description: "The user's locations.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "non_editable_aliases",
 				Description: "A list of the user's non-editable alias email addresses.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "notes",
+				Description: "Notes for the user.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "organizations",
+				Description: "A list of organizations the user belongs to.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "phones",
+				Description: "A list of the user's phone numbers.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "posix_accounts",
+				Description: "A list of POSIX account information for the user.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "relations",
+				Description: "A list of the user's relationships to other users.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "ssh_public_keys",
+				Description: "A list of SSH public keys.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "websites",
+				Description: "The user's websites.",
 				Type:        proto.ColumnType_JSON,
 			},
 		},

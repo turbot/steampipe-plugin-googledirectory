@@ -19,7 +19,7 @@ const pluginName = "steampipe-plugin-googledirectory"
 func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name:             pluginName,
-		DefaultTransform: transform.FromCamel(),
+		DefaultTransform: transform.FromCamel().NullIfZero(),
 		DefaultGetConfig: &plugin.GetConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 		},
