@@ -28,7 +28,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"google_directory_user": tableGoogleDirectroryUser(ctx),
+			"googledirectory_user": tableGoogleDirectroryUser(ctx),
 		},
 	}
 

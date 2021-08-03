@@ -1,4 +1,4 @@
-# Table: google_directory_user
+# Table: googledirectory_user
 
 Query information about users defined in the Google Workspace.
 
@@ -15,7 +15,7 @@ select
   is_delegated_admin,
   customer_id
 from
-  google_directory_user;
+  googledirectory_user;
 ```
 
 ### Get user by ID
@@ -29,7 +29,7 @@ select
   is_delegated_admin,
   customer_id
 from
-  google_directory_user
+  googledirectory_user
 where
   id = '119982672925259996273';
 ```
@@ -45,7 +45,7 @@ select
   is_delegated_admin,
   customer_id
 from
-  google_directory_user
+  googledirectory_user
 where
   primary_email = 'mscott@dundermifflin.com';
 ```
@@ -60,7 +60,7 @@ select
   is_admin,
   is_delegated_admin
 from
-  google_directory_user
+  googledirectory_user
 where
   is_admin
   or is_delegated_admin;
@@ -76,7 +76,7 @@ select
   is_enrolled_in_2sv,
   is_enforced_in_2sv
 from
-  google_directory_user
+  googledirectory_user
 where
   not is_enrolled_in_2sv
   or not is_enforced_in_2sv;
@@ -91,7 +91,7 @@ select
   primary_email,
   last_login_time
 from
-  google_directory_user
+  googledirectory_user
 where
   last_login_time < current_timestamp - interval '30 days';
 ```

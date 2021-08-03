@@ -14,8 +14,8 @@ import (
 
 func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "google_directory_user",
-		Description: "Google Directory User",
+		Name:        "googledirectory_user",
+		Description: "Users defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryUsers,
 		},
