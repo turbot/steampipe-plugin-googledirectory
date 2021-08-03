@@ -2,8 +2,10 @@ package googledirectory
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
@@ -13,26 +15,41 @@ import (
 
 func AdminService(ctx context.Context, d *plugin.QueryData) (*admin.Service, error) {
 	// have we already created and cached the service?
-	serviceCacheKey := "AdminService"
+	serviceCacheKey := "googledirectory.admin"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*admin.Service), nil
 	}
 
 	// so it was not in cache - create service
-	svc, err := createDirectoryService(ctx, d.Connection)
+	ts, err := getTokenSource(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create service
+	svc, err := admin.NewService(ctx, option.WithTokenSource(ts))
 	if err != nil {
 		return nil, err
 	}
 
 	// cache the service
 	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+
 	return svc, nil
 }
 
-func createDirectoryService(ctx context.Context, connection *plugin.Connection) (*admin.Service, error) {
+func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSource, error) {
+	// NOTE: based on https://developers.google.com/admin-sdk/directory/v1/guides/delegation#go
+
+	// have we already created and cached the token?
+	cacheKey := "googledirectory.token_source"
+	if ts, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+		return ts.(oauth2.TokenSource), nil
+	}
+
 	// Get credential file path, and user to impersonate from config (if mentioned)
 	var credentialPath, impersonateUser string
-	googledirectoryConfig := GetConfig(connection)
+	googledirectoryConfig := GetConfig(d.Connection)
 	if &googledirectoryConfig != nil {
 		if googledirectoryConfig.CredentialFile != nil {
 			credentialPath = *googledirectoryConfig.CredentialFile
@@ -42,6 +59,11 @@ func createDirectoryService(ctx context.Context, connection *plugin.Connection) 
 		}
 	}
 
+	// Credentials not set
+	if credentialPath == "" {
+		return nil, errors.New("credential_file must be configured")
+	}
+
 	// Read credential file
 	jsonCredentials, err := ioutil.ReadFile(credentialPath)
 	if err != nil {
@@ -49,7 +71,14 @@ func createDirectoryService(ctx context.Context, connection *plugin.Connection) 
 	}
 
 	// Authorize the request
-	config, err := google.JWTConfigFromJSON(jsonCredentials, admin.AdminDirectoryUserScope)
+	config, err := google.JWTConfigFromJSON(
+		jsonCredentials,
+		admin.AdminDirectoryDomainReadonlyScope,
+		admin.AdminDirectoryGroupReadonlyScope,
+		admin.AdminDirectoryOrgunitReadonlyScope,
+		admin.AdminDirectoryRolemanagementReadonlyScope,
+		admin.AdminDirectoryUserReadonlyScope,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +86,8 @@ func createDirectoryService(ctx context.Context, connection *plugin.Connection) 
 
 	ts := config.TokenSource(ctx)
 
-	// Create service
-	srv, err := admin.NewService(ctx, option.WithTokenSource(ts))
-	if err != nil {
-		return nil, err
-	}
+	// cache the token source
+	d.ConnectionManager.Cache.Set(cacheKey, ts)
 
-	return srv, nil
+	return ts, nil
 }
