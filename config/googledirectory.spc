@@ -1,10 +1,10 @@
 connection "googledirectory" {
-  plugin    = "googledirectory"
+  plugin = "googledirectory"
 
-  # `credential_file` (optional) -  - The path to a JSON credential file that contains 
-  # Google application credentials.  If `credential_file` is not specified in a connection,
-  # credentials will be loaded from:
-  #   - The path specified in the `GOOGLE_DIRECTORY_CREDENTIALS` environment variable, if set; otherwise
-  #   - The standard location (`~/.config/gcloud/directory_default_credentials.json`)
-  #credential_file    = "~/.config/gcloud/directory_default_credentials.json"        
+  # `credential_file` - The path to a JSON credential file that contains Google application credentials.
+  #credential_file = "PATH_TO_CREDENTIAL_FILE"
+
+  # `impersonate_user` - The workspace directory user (string) which should be impersonated. Needs permissions to access the Admin APIs.
+  # If not set, no impersonation is done.
+  #impersonate_user = "USER_EMAIL"
 }
