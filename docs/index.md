@@ -54,7 +54,7 @@ steampipe plugin install googledirectory
 
 | Item        | Description                                                                                                                         |
 | :---------- | :-----------------------------------------------------------------------------------------------------------------------------------|
-| Credentials | Google Directory requires a [Private key](https://developers.google.com/admin-sdk/directory/v1/guides/delegation) for all requests. |
+| Credentials | Generate your [Application Credentials](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_credentials) and configure the service account to perform [Domain-Wide Delegation of Authority](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#delegate_domain-wide_authority_to_your_service_account). Use `ReadOnly` OAuth scopes for domain-wide access to a resource. See [Authorize requests](https://developers.google.com/admin-sdk/directory/v1/guides/authorizing#OAuth2Authorizing) for possible scopes. |
 | Radius      | Each connection represents a single Google Workspace account.                                                                       |
 
 ### Configuration
