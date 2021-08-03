@@ -1,6 +1,6 @@
 # Table: googledirectory_privilege
 
-Query information about privileges defined in the Google Workspace.
+Query information about privileges defined in the Google Workspace directory.
 
 ## Examples
 
