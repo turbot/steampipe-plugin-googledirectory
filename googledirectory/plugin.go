@@ -31,6 +31,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"googledirectory_domain":       tableGoogleDirectroryDomain(ctx),
 			"googledirectory_group":        tableGoogleDirectroryGroup(ctx),
 			"googledirectory_group_member": tableGoogleDirectroryGroupMember(ctx),
+			"googledirectory_privilege":    tableGoogleDirectroryPrivilege(ctx),
+			"googledirectory_role":         tableGoogleDirectroryRole(ctx),
 			"googledirectory_user":         tableGoogleDirectroryUser(ctx),
 		},
 	}
