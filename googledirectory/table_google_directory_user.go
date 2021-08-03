@@ -59,8 +59,18 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "is_admin",
-				Description: "Indicates whether an user have super admininistrator privileges, or not.",
+				Description: "Indicates whether an user have super administrator privileges, or not.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "is_delegated_admin",
+				Description: "Indicates whether the user is a delegated administrator, or not.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account users.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "suspended",
@@ -81,11 +91,6 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Name:        "change_password_at_next_login",
 				Description: "Indicates if the user is forced to change their password at next login.",
 				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "customer_id",
-				Description: "The customer ID to retrieve all account users.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "deletion_time",
@@ -111,11 +116,6 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 			{
 				Name:        "ip_whitelisted",
 				Description: "Indicates whether the user's IP address is whitelisted, or not.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "is_delegated_admin",
-				Description: "Indicates whether the user is a delegated administrator, or not.",
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
@@ -197,7 +197,7 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
+	// Create service
 	service, err := AdminService(ctx, d)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 func getDirectoryUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDirectoryUser")
 
-	// Create Service Connection
+	// Create service
 	service, err := AdminService(ctx, d)
 	if err != nil {
 		return nil, err

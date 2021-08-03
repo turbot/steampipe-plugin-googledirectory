@@ -63,6 +63,9 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 	if credentialPath == "" {
 		return nil, errors.New("credential_file must be configured")
 	}
+	if impersonateUser == "" {
+		return nil, errors.New("impersonate_user must be configured")
+	}
 
 	// Read credential file
 	jsonCredentials, err := ioutil.ReadFile(credentialPath)
