@@ -54,7 +54,7 @@ steampipe plugin install googledirectory
 
 | Item        | Description                                                                                                                         |
 | :---------- | :-----------------------------------------------------------------------------------------------------------------------------------|
-| Credentials | Generate your [Application Credentials](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_credentials) and configure the service account to perform [Domain-Wide Delegation of Authority](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#delegate_domain-wide_authority_to_your_service_account). Use `ReadOnly` OAuth scopes for domain-wide access to a resource. See [Authorize requests](https://developers.google.com/admin-sdk/directory/v1/guides/authorizing#OAuth2Authorizing) for possible scopes. |
+| Credentials | Generate your [service account and credentials](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_credentials) and configure to [Delegate domain-wide authority to your service account](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#delegate_domain-wide_authority_to_your_service_account). Enter the following OAuth 2.0 scopes for the services that the service account can access:<br />`https://www.googleapis.com/auth/admin.directory.user.readonly`<br />`https://www.googleapis.com/auth/admin.directory.domain.readonly`<br />`https://www.googleapis.com/auth/admin.directory.group.readonly`<br />`https://www.googleapis.com/auth/admin.directory.orgunit.readonly`<br />`https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly` |
 | Radius      | Each connection represents a single Google Workspace account.                                                                       |
 
 ### Configuration
@@ -63,9 +63,14 @@ Installing the latest googledirectory plugin will create a config file (`~/.stea
 
 ```hcl
 connection "googledirectory" {
-  plugin           = "googledirectory"
-  credential_file  = "~/my-service-account-creds.json"
-  impersonate_user = "username@dmain.com"
+  plugin = "googledirectory"
+
+  # `credential_file` (required) - The path to a JSON credential file that contains Google application credentials.
+  #credential_file = "PATH_TO_CREDENTIAL_FILE"
+
+  # `impersonate_user` (required) - The workspace directory user (string) which should be impersonated. Needs permissions to access the Admin APIs.
+  # If not set, no impersonation is done.
+  #impersonate_user = "USER_EMAIL"
 }
 ```
 
