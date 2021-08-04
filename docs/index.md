@@ -65,12 +65,11 @@ Installing the latest googledirectory plugin will create a config file (`~/.stea
 connection "googledirectory" {
   plugin = "googledirectory"
 
-  # `credential_file` (required) - The path to a JSON credential file that contains Google application credentials.
-  #credential_file = "PATH_TO_CREDENTIAL_FILE"
+  # `credential_file` (required) - The path to a JSON credential file that contains service account credentials.
+  #credential_file = "/path/to/<public_key_fingerprint>-privatekey.json"
 
-  # `impersonate_user` (required) - The workspace directory user (string) which should be impersonated. Needs permissions to access the Admin APIs.
-  # If not set, no impersonation is done.
-  #impersonate_user = "USER_EMAIL"
+  # `impersonate_user` (required) - The email (string) of the user which should be impersonated. Needs permissions to access the Admin APIs.
+  #impersonate_user = "username@domain.com"
 }
 ```
 
