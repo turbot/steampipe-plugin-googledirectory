@@ -54,8 +54,8 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 	if googledirectoryConfig.CredentialFile != nil {
 		credentialPath = *googledirectoryConfig.CredentialFile
 	}
-	if googledirectoryConfig.ImpersonateUser != nil {
-		impersonateUser = *googledirectoryConfig.ImpersonateUser
+	if googledirectoryConfig.ImpersonatedUserEmail != nil {
+		impersonateUser = *googledirectoryConfig.ImpersonatedUserEmail
 	}
 
 	// If credential path not mentioned in steampipe config, search for env variable
@@ -68,7 +68,7 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 		return nil, errors.New("credential_file must be configured")
 	}
 	if impersonateUser == "" {
-		return nil, errors.New("impersonate_user must be configured")
+		return nil, errors.New("impersonated_user_email must be configured")
 	}
 
 	// Read credential file

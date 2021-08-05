@@ -6,6 +6,7 @@ connection "googledirectory" {
   #  - The path specified in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable, if set
   #credential_file = "/path/to/<public_key_fingerprint>-privatekey.json"
 
-  # `impersonate_user` (required) - The email (string) of the user which should be impersonated. Needs permissions to access the Admin APIs.
-  #impersonate_user = "username@domain.com"
+  # `impersonated_user_email` (required) - The email (string) of the user which should be impersonated. Needs permissions to access the Admin APIs.
+  # `impersonated_user_email` must be set, since the service account needs to impersonate one of those users to access the directory.
+  #impersonated_user_email = "username@domain.com"
 }

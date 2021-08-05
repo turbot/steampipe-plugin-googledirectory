@@ -6,15 +6,15 @@ import (
 )
 
 type googledirectoryConfig struct {
-	CredentialFile  *string `cty:"credential_file"`
-	ImpersonateUser *string `cty:"impersonate_user"`
+	CredentialFile        *string `cty:"credential_file"`
+	ImpersonatedUserEmail *string `cty:"impersonated_user_email"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
 	"credential_file": {
 		Type: schema.TypeString,
 	},
-	"impersonate_user": {
+	"impersonated_user_email": {
 		Type: schema.TypeString,
 	},
 }
