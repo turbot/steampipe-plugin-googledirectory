@@ -72,7 +72,7 @@ func tableGoogleDirectroryGroup(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "etag",
-				Description: "Specifies the ETag of the resource.",
+				Description: "A hash of the metadata, used to ensure there were no concurrent modifications to the resource when attempting an update.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
