@@ -18,6 +18,16 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 		Description: "Users defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryUsers,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "query",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "primary_email"}),
@@ -181,6 +191,12 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "query",
+				Description: "Filter string to [filter](https://developers.google.com/admin-sdk/directory/v1/guides/search-users) users.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("query"),
+			},
+			{
 				Name:        "addresses",
 				Description: "A list of the user's addresses.",
 				Type:        proto.ColumnType_JSON,
@@ -278,7 +294,18 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	resp := service.Users.List().Customer("my_customer")
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	var query string
+	if d.KeyColumnQuals["query"] != nil {
+		query = d.KeyColumnQuals["query"].GetStringValue()
+	}
+
+	resp := service.Users.List().Customer(customerID).Query(query)
 	if err := resp.Pages(ctx, func(page *admin.Users) error {
 		for _, user := range page.Users {
 			d.StreamListItem(ctx, user)

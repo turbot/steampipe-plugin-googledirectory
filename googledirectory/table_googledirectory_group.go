@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -17,6 +18,16 @@ func tableGoogleDirectroryGroup(_ context.Context) *plugin.Table {
 		Description: "Groups defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryGroups,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "query",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "email"}),
@@ -44,6 +55,12 @@ func tableGoogleDirectroryGroup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account groups.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("customer_id"),
+			},
+			{
 				Name:        "description",
 				Description: "An extended description to help users determine the purpose of a group.",
 				Type:        proto.ColumnType_STRING,
@@ -62,6 +79,12 @@ func tableGoogleDirectroryGroup(_ context.Context) *plugin.Table {
 				Name:        "kind",
 				Description: "The type of the API resource.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "query",
+				Description: "Filter string to [filter](https://developers.google.com/admin-sdk/directory/v1/guides/search-groups) groups.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("query"),
 			},
 			{
 				Name:        "aliases",
@@ -86,7 +109,19 @@ func listDirectoryGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	resp := service.Groups.List().Customer("my_customer")
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	query := d.KeyColumnQuals["query"].GetStringValue()
+	// Since, query parameter can't be empty, set default param name:**, to return all groups
+	if query == "" {
+		query = "name:**"
+	}
+
+	resp := service.Groups.List().Customer(customerID).Query(query)
 	if err := resp.Pages(ctx, func(page *admin.Groups) error {
 		for _, group := range page.Groups {
 			d.StreamListItem(ctx, group)

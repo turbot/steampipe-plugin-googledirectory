@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -15,6 +16,12 @@ func tableGoogleDirectroryPrivilege(_ context.Context) *plugin.Table {
 		Description: "Privileges defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryPrivileges,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -36,6 +43,12 @@ func tableGoogleDirectroryPrivilege(_ context.Context) *plugin.Table {
 				Name:        "is_ou_scopable",
 				Description: "Indicates if the privilege can be restricted to an organization unit.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all privileges for a customer.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("customer_id"),
 			},
 			{
 				Name:        "etag",
@@ -65,7 +78,13 @@ func listDirectoryPrivileges(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	resp, err := service.Privileges.List("my_customer").Do()
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	resp, err := service.Privileges.List(customerID).Do()
 	if err != nil {
 		return nil, err
 	}

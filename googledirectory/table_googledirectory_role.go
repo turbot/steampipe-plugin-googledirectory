@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -17,6 +18,12 @@ func tableGoogleDirectroryRole(_ context.Context) *plugin.Table {
 		Description: "Roles defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryRoles,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("role_id"),
@@ -49,6 +56,12 @@ func tableGoogleDirectroryRole(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account roles.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("customer_id"),
+			},
+			{
 				Name:        "etag",
 				Description: "Specifies the etag of the resource.",
 				Type:        proto.ColumnType_STRING,
@@ -76,7 +89,13 @@ func listDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	resp := service.Roles.List("my_customer")
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	resp := service.Roles.List(customerID)
 	if err := resp.Pages(ctx, func(page *admin.Roles) error {
 		for _, role := range page.Items {
 			d.StreamListItem(ctx, role)

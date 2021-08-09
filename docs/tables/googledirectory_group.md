@@ -73,3 +73,17 @@ order by
   g.name,
   m.email;
 ```
+
+### List groups using filter
+
+```sql
+select
+  name,
+  id,
+  email,
+  admin_created
+from
+  googledirectory_group
+where
+  query = 'email:steampipe*';
+```

@@ -16,6 +16,12 @@ func tableGoogleDirectroryDomain(_ context.Context) *plugin.Table {
 		Description: "Domains defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryDomains,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("domain_name"),
@@ -42,6 +48,12 @@ func tableGoogleDirectroryDomain(_ context.Context) *plugin.Table {
 				Name:        "verified",
 				Description: "Indicates the verification state of a domain.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account roles.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("customer_id"),
 			},
 			{
 				Name:        "etag",
@@ -71,7 +83,13 @@ func listDirectoryDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	resp, err := service.Domains.List("my_customer").Do()
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	resp, err := service.Domains.List(customerID).Do()
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -15,6 +16,12 @@ func tableGoogleDirectroryOrgUnit(_ context.Context) *plugin.Table {
 		Description: "OrgUnits defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryOrgUnits,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"org_unit_id", "org_unit_path"}),
@@ -40,6 +47,12 @@ func tableGoogleDirectroryOrgUnit(_ context.Context) *plugin.Table {
 				Name:        "block_inheritance",
 				Description: "Determines if a sub-organizational unit can inherit the settings of the parent organization.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "customer_id",
+				Description: "The customer ID to retrieve all account roles.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("customer_id"),
 			},
 			{
 				Name:        "description",
@@ -79,7 +92,13 @@ func listDirectoryOrgUnits(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	resp, err := service.Orgunits.List("my_customer").Do()
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
+
+	resp, err := service.Orgunits.List(customerID).Do()
 	if err != nil {
 		return nil, err
 	}

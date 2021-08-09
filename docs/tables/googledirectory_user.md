@@ -95,3 +95,17 @@ from
 where
   last_login_time < current_timestamp - interval '30 days';
 ```
+
+### List users using filter
+
+```sql
+select
+  id,
+  full_name,
+  primary_email,
+  last_login_time
+from
+  googledirectory_user
+where
+  query = 'givenName:steampipe*';
+```
