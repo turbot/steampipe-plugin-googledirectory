@@ -17,6 +17,8 @@ Install the plugin with [Steampipe](https://steampipe.io):
 steampipe plugin install googledirectory
 ```
 
+Configure your [credentials](https://hub.steampipe.io/plugins/turbot/googledirectory#credentials) and [config file](https://hub.steampipe.io/plugins/turbot/googledirectory#configuration).
+
 Run a query:
 
 ```sql
