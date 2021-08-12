@@ -2,7 +2,7 @@
 organization: Turbot
 category: ["saas"]
 icon_url: "/images/plugins/turbot/googledirectory.svg"
-brand_color: "#ea4335"
+brand_color: "#1967D2"
 display_name: "Google Directory"
 short_name: "googledirectory"
 description: "Steampipe plugin for querying users, groups, org units and more from your Google Workspace directory."
