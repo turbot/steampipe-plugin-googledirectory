@@ -27,19 +27,6 @@ select
 from
   googledirectory_user;
 ```
-## Credentials
-
-This plugin uses the Admin SDK Directory API to gather information from Google Workspace.  The recommended method for Directory API authentication is to use a GCP Service Account with Domain Wide Delegation.
-
-To setup Domain Wide Delegation follow these [instructions](https://developers.google.com/admin-sdk/directory/v1/guides/delegation).
-
-When asked for scopes, input the following
-
-```
-https://www.googleapis.com/auth/admin.directory.group.member.readonly, https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.user.alias.readonly,https://www.googleapis.com/auth/admin.directory.user.security,https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly,https://www.googleapis.com/auth/admin.directory.customer.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly
-```
-
-Once the above steps have been completed, follow the instructions in [Developing](#developing).
 
 ## Developing
 
