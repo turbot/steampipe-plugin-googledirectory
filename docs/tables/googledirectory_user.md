@@ -66,7 +66,7 @@ where
   or is_delegated_admin;
 ```
 
-### Users without two step verification
+### List users without two-step verification
 
 ```sql
 select
@@ -82,7 +82,7 @@ where
   or not is_enforced_in_2sv;
 ```
 
-### Users who have not logged in for more than 30 days
+### List users who have not logged in for more than 30 days
 
 ```sql
 select
@@ -96,7 +96,7 @@ where
   last_login_time < current_timestamp - interval '30 days';
 ```
 
-### List users using filter
+### List users using the [query filter](https://developers.google.com/admin-sdk/directory/v1/guides/search-users)
 
 ```sql
 select

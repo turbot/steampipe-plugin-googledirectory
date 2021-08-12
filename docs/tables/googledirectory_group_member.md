@@ -37,7 +37,7 @@ where
   and role = 'OWNER';
 ```
 
-### Role composition for a group
+### List role counts for a group
 
 ```sql
 select
@@ -52,7 +52,7 @@ order by
   count desc;
 ```
 
-### List all groups with all members
+### List all groups and their members
 
 ```sql
 select

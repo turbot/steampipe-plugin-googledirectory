@@ -44,7 +44,7 @@ where
   email = 'scranton@dundermifflin.com';
 ```
 
-### Top 5 groups by member count
+### List top 5 groups by member count
 
 ```sql
 select
@@ -57,7 +57,7 @@ order by
 limit 5;
 ```
 
-### List all groups with all members
+### List all groups and their members
 
 ```sql
 select
@@ -74,7 +74,7 @@ order by
   m.email;
 ```
 
-### List groups using filter
+### List groups using the [query filter](https://developers.google.com/admin-sdk/directory/v1/guides/search-groups)
 
 ```sql
 select
