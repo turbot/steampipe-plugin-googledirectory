@@ -223,7 +223,7 @@ func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "ims",
-				Description: "The user's Instant Messenger(IM) accounts.",
+				Description: "The user's Instant Messenger (IM) accounts.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
