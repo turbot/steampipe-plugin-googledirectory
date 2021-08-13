@@ -10,7 +10,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryDomain(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryDomain(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_domain",
 		Description: "Domains defined in the Google Workspace directory.",

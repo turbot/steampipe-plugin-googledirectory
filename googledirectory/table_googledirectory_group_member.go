@@ -13,7 +13,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryGroupMember(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_group_member",
 		Description: "Group members defined in the Google Workspace directory.",

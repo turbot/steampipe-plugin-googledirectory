@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_user",
 		Description: "Users defined in the Google Workspace directory.",
@@ -223,7 +223,7 @@ func tableGoogleDirectroryUser(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "ims",
-				Description: "The user's Instant Messenger (IM) accounts.",
+				Description: "The user's Instant Messenger(IM) accounts.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
