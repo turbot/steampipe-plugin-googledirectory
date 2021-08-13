@@ -10,7 +10,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryPrivilege(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryPrivilege(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_privilege",
 		Description: "Privileges defined in the Google Workspace directory.",

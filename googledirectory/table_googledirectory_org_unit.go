@@ -10,7 +10,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryOrgUnit(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryOrgUnit(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_org_unit",
 		Description: "OrgUnits defined in the Google Workspace directory.",
