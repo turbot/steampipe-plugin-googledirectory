@@ -24,7 +24,7 @@ func tableGoogleDirectoryDomainAlias(_ context.Context) *plugin.Table {
 			},
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("domain_Alias_name"),
+			KeyColumns: plugin.SingleColumn("domain_alias_name"),
 			Hydrate:    getDirectoryDomainAlias,
 		},
 		Columns: []*plugin.Column{
