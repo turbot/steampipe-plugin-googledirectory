@@ -29,6 +29,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"googledirectory_domain":       tableGoogleDirectoryDomain(ctx),
+			"googledirectory_domain_alias": tableGoogleDirectoryDomainAlias(ctx),
 			"googledirectory_group":        tableGoogleDirectoryGroup(ctx),
 			"googledirectory_group_member": tableGoogleDirectoryGroupMember(ctx),
 			"googledirectory_org_unit":     tableGoogleDirectoryOrgUnit(ctx),
