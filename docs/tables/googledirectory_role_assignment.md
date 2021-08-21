@@ -16,7 +16,7 @@ from
   googledirectory_role_assignment;
 ```
 
-### Get role assigments by ID
+### Get role assigments by role ID
 
 ```sql
 select
@@ -27,5 +27,5 @@ select
 from
   googledirectory_role_assignment
 where
-  role_id = '02ce457p6conzyd';
+  role_id = '522363132560015';
 ```
