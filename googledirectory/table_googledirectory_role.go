@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryRole(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_role",
 		Description: "Roles defined in the Google Workspace directory.",

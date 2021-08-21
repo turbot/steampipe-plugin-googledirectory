@@ -28,14 +28,14 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"googledirectory_domain":        tableGoogleDirectroryDomain(ctx),
-			"googledirectory_group":         tableGoogleDirectroryGroup(ctx),
-			"googledirectory_group_member":  tableGoogleDirectroryGroupMember(ctx),
+			"googledirectory_domain":        tableGoogleDirectoryDomain(ctx),
+			"googledirectory_group":         tableGoogleDirectoryGroup(ctx),
+			"googledirectory_group_member":  tableGoogleDirectoryGroupMember(ctx),
 			"googledirectory_mobile_device": tableGoogleDirectroryMobileDevice(ctx),
-			"googledirectory_org_unit":      tableGoogleDirectroryOrgUnit(ctx),
-			"googledirectory_privilege":     tableGoogleDirectroryPrivilege(ctx),
-			"googledirectory_role":          tableGoogleDirectroryRole(ctx),
-			"googledirectory_user":          tableGoogleDirectroryUser(ctx),
+			"googledirectory_org_unit":      tableGoogleDirectoryOrgUnit(ctx),
+			"googledirectory_privilege":     tableGoogleDirectoryPrivilege(ctx),
+			"googledirectory_role":          tableGoogleDirectoryRole(ctx),
+			"googledirectory_user":          tableGoogleDirectoryUser(ctx),
 		},
 	}
 

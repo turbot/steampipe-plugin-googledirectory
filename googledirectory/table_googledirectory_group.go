@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGoogleDirectroryGroup(_ context.Context) *plugin.Table {
+func tableGoogleDirectoryGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_group",
 		Description: "Groups defined in the Google Workspace directory.",
