@@ -80,6 +80,7 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 	// Authorize the request
 	config, err := google.JWTConfigFromJSON(
 		jsonCredentials,
+		admin.AdminDirectoryDeviceMobileReadonlyScope,
 		admin.AdminDirectoryDomainReadonlyScope,
 		admin.AdminDirectoryGroupReadonlyScope,
 		admin.AdminDirectoryOrgunitReadonlyScope,
