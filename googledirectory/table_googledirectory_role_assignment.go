@@ -40,7 +40,7 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "role_assignment_id",
-				Description: "The unique ID for the role assigment.",
+				Description: "The unique ID for the role assignment.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -109,17 +109,9 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 		roleId = d.KeyColumnQuals["role_id"].GetStringValue()
 	}
 
-	var userKey string
+	resp := service.RoleAssignments.List(customerID).RoleId(roleId)
 	if d.KeyColumnQuals["user_key"] != nil {
-		userKey = d.KeyColumnQuals["user_key"].GetStringValue()
-	}
-
-	var resp *admin.RoleAssignmentsListCall
-
-	if userKey != "" {
-		resp = service.RoleAssignments.List(customerID).UserKey(userKey).RoleId(roleId)
-	} else {
-		resp = service.RoleAssignments.List(customerID).RoleId(roleId)
+		resp.UserKey(d.KeyColumnQuals["user_key"].GetStringValue())
 	}
 	if err := resp.Pages(ctx, func(page *admin.RoleAssignments) error {
 		for _, assignment := range page.Items {
