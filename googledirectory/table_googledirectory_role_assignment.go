@@ -23,6 +23,14 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 					Name:    "customer_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "role_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "user_key",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		Get: &plugin.GetConfig{
@@ -50,6 +58,12 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 				Description: "The customer ID to retrieve all account roles.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromQual("customer_id"),
+			},
+			{
+				Name:        "user_key",
+				Description: "The user's primary email address, alias email address, or unique user ID.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("user_key"),
 			},
 			{
 				Name:        "etag",
@@ -90,7 +104,23 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
 
-	resp := service.RoleAssignments.List(customerID)
+	var roleId string
+	if d.KeyColumnQuals["role_id"] != nil {
+		roleId = d.KeyColumnQuals["role_id"].GetStringValue()
+	}
+
+	var userKey string
+	if d.KeyColumnQuals["user_key"] != nil {
+		userKey = d.KeyColumnQuals["user_key"].GetStringValue()
+	}
+
+	var resp *admin.RoleAssignmentsListCall
+
+	if userKey != "" {
+		resp = service.RoleAssignments.List(customerID).UserKey(userKey).RoleId(roleId)
+	} else {
+		resp = service.RoleAssignments.List(customerID).RoleId(roleId)
+	}
 	if err := resp.Pages(ctx, func(page *admin.RoleAssignments) error {
 		for _, assignment := range page.Items {
 			d.StreamListItem(ctx, assignment)
