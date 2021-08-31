@@ -32,10 +32,20 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("role_assignment_id"),
-			Hydrate:    getDirectoryRoleAssignment,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "role_assignment_id",
+					Require: plugin.Required,
+				},
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
+			Hydrate: getDirectoryRoleAssignment,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -51,6 +61,11 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 			{
 				Name:        "assigned_to",
 				Description: "The unique ID of the user this role is assigned to.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "scope_type",
+				Description: "The scope in which this role is assigned.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -78,11 +93,6 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 			{
 				Name:        "org_unit_id",
 				Description: "If the role is restricted to an organization unit, this contains the ID for the organization unit the exercise of this role is restricted to.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "scope_type",
-				Description: "The scope in which this role is assigned.",
 				Type:        proto.ColumnType_STRING,
 			},
 		},
@@ -122,7 +132,7 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 		return nil, err
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -136,6 +146,11 @@ func getDirectoryRoleAssignment(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
 	roleAssignmentId := d.KeyColumnQuals["role_assignment_id"].GetStringValue()
 
 	// Return nil, if no input provided
@@ -143,7 +158,7 @@ func getDirectoryRoleAssignment(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, nil
 	}
 
-	resp, err := service.RoleAssignments.Get("my_customer", roleAssignmentId).Do()
+	resp, err := service.RoleAssignments.Get(customerID, roleAssignmentId).Do()
 	if err != nil {
 		return nil, err
 	}
