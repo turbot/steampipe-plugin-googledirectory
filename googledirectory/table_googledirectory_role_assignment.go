@@ -32,7 +32,7 @@ func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -126,6 +126,11 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 	if err := resp.Pages(ctx, func(page *admin.RoleAssignments) error {
 		for _, assignment := range page.Items {
 			d.StreamListItem(ctx, assignment)
+
+			// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) {
+				break
+			}
 		}
 		return nil
 	}); err != nil {

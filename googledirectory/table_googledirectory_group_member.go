@@ -18,8 +18,18 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 		Name:        "googledirectory_group_member",
 		Description: "Group members defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
-			Hydrate:    listDirectoryGroupMembers,
-			KeyColumns: plugin.SingleColumn("group_id"),
+			Hydrate: listDirectoryGroupMembers,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "group_id",
+					Require: plugin.Required,
+				},
+				{
+					Name:    "role",
+					Require: plugin.Optional,
+				},
+			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"group_id", "id"}),
@@ -87,7 +97,12 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plug
 	}
 	groupID := d.KeyColumnQuals["group_id"].GetStringValue()
 
-	resp := service.Members.List(groupID)
+	var role string
+	if d.KeyColumnQuals["role"] != nil {
+		role = d.KeyColumnQuals["role"].GetStringValue()
+	}
+
+	resp := service.Members.List(groupID).Roles(role)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
 		for _, member := range page.Members {
 			d.StreamListItem(ctx, member)

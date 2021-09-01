@@ -22,6 +22,7 @@ func tableGoogleDirectoryDomain(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("domain_name"),

@@ -2,6 +2,8 @@ package googledirectory
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -24,10 +26,23 @@ func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:    "full_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "family_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "given_name",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "query",
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "primary_email"}),
@@ -294,21 +309,36 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
+	equalQuals := d.KeyColumnQuals
+
+	var queryFilter, query string
+	filter := buildUserQueryFilter(equalQuals)
+
+	if equalQuals["query"] != nil {
+		queryFilter = equalQuals["query"].GetStringValue()
+	}
+
+	if queryFilter != "" {
+		query = queryFilter
+	} else if len(filter) > 0 {
+		query = strings.Join(filter, " ")
+	}
+
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
 	if d.KeyColumnQuals["customer_id"] != nil {
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
 
-	var query string
-	if d.KeyColumnQuals["query"] != nil {
-		query = d.KeyColumnQuals["query"].GetStringValue()
-	}
-
 	resp := service.Users.List().Customer(customerID).Query(query)
 	if err := resp.Pages(ctx, func(page *admin.Users) error {
 		for _, user := range page.Users {
 			d.StreamListItem(ctx, user)
+
+			// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) {
+				break
+			}
 		}
 		return nil
 	}); err != nil {
@@ -350,4 +380,22 @@ func getDirectoryUser(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	return resp, nil
+}
+
+func buildUserQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
+	filters := []string{}
+
+	filterQuals := map[string]string{
+		"full_name":   "name",
+		"family_name": "familyName",
+		"given_name":  "givenName",
+	}
+
+	for qual, filterColumn := range filterQuals {
+		if equalQuals[qual] != nil {
+			filters = append(filters, fmt.Sprintf("%s='%s'", filterColumn, equalQuals[qual].GetStringValue()))
+		}
+	}
+
+	return filters
 }

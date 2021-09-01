@@ -2,6 +2,8 @@ package googledirectory
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -24,10 +26,15 @@ func tableGoogleDirectoryGroup(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "query",
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "email"}),
@@ -109,22 +116,53 @@ func listDirectoryGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
+	var queryFilter, query string
+	var filter []string
+
+	if d.KeyColumnQuals["name"] != nil {
+		filter = append(filter, fmt.Sprintf("name='%s'", d.KeyColumnQuals["name"].GetStringValue()))
+	}
+
+	if d.KeyColumnQuals["query"] != nil {
+		queryFilter = d.KeyColumnQuals["query"].GetStringValue()
+	}
+
+	if queryFilter != "" {
+		query = queryFilter
+	} else if len(filter) > 0 {
+		query = strings.Join(filter, " ")
+	}
+
+	// Since, query parameter can't be empty, set default param name:**, to return all groups
+	if query == "" {
+		query = "name:**"
+	}
+
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
 	if d.KeyColumnQuals["customer_id"] != nil {
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
 
-	query := d.KeyColumnQuals["query"].GetStringValue()
-	// Since, query parameter can't be empty, set default param name:**, to return all groups
-	if query == "" {
-		query = "name:**"
+	// By default, API can return maximum 200 records in a single page
+	maxResult := int64(200)
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < maxResult {
+			maxResult = *limit
+		}
 	}
 
-	resp := service.Groups.List().Customer(customerID).Query(query)
+	resp := service.Groups.List().Customer(customerID).Query(query).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Groups) error {
 		for _, group := range page.Groups {
 			d.StreamListItem(ctx, group)
+
+			// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) {
+				break
+			}
 		}
 		return nil
 	}); err != nil {

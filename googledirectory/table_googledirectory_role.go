@@ -24,6 +24,7 @@ func tableGoogleDirectoryRole(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("role_id"),
@@ -99,6 +100,11 @@ func listDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	if err := resp.Pages(ctx, func(page *admin.Roles) error {
 		for _, role := range page.Items {
 			d.StreamListItem(ctx, role)
+
+			// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) {
+				break
+			}
 		}
 		return nil
 	}); err != nil {
