@@ -15,7 +15,7 @@ import (
 func tableGoogleDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_role_assignment",
-		Description: "Role Assignments defined in the Google Workspace directory.",
+		Description: "Role assignments defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryRoleAssignments,
 			KeyColumns: []*plugin.KeyColumn{
