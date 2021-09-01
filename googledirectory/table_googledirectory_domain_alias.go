@@ -13,7 +13,7 @@ import (
 func tableGoogleDirectoryDomainAlias(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "googledirectory_domain_alias",
-		Description: "Domain Alias defined in the Google Workspace directory.",
+		Description: "Domain alias defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
 			Hydrate: listDirectoryDomainAliases,
 			KeyColumns: []*plugin.KeyColumn{
@@ -21,16 +21,35 @@ func tableGoogleDirectoryDomainAlias(_ context.Context) *plugin.Table {
 					Name:    "customer_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "parent_domain_name",
+					Require: plugin.Optional,
+				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("domain_alias_name"),
-			Hydrate:    getDirectoryDomainAlias,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "domain_alias_name",
+					Require: plugin.Required,
+				},
+				{
+					Name:    "customer_id",
+					Require: plugin.Optional,
+				},
+			},
+			Hydrate: getDirectoryDomainAlias,
 		},
 		Columns: []*plugin.Column{
 			{
 				Name:        "domain_alias_name",
 				Description: "The domain alias name.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "parent_domain_name",
+				Description: "The parent domain name that the domain alias is associated with.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -60,11 +79,6 @@ func tableGoogleDirectoryDomainAlias(_ context.Context) *plugin.Table {
 				Description: "The type of the API resource.",
 				Type:        proto.ColumnType_STRING,
 			},
-			{
-				Name:        "parent_domain_name",
-				Description: "The parent domain name that the domain alias is associated with.",
-				Type:        proto.ColumnType_STRING,
-			},
 		},
 	}
 }
@@ -83,8 +97,12 @@ func listDirectoryDomainAliases(ctx context.Context, d *plugin.QueryData, _ *plu
 	if d.KeyColumnQuals["customer_id"] != nil {
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
+	var parentDomainName string
+	if d.KeyColumnQuals["parent_domain_name"] != nil {
+		parentDomainName = d.KeyColumnQuals["parent_domain_name"].GetStringValue()
+	}
 
-	resp, err := service.DomainAliases.List(customerID).Do()
+	resp, err := service.DomainAliases.List(customerID).ParentDomainName(parentDomainName).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +124,11 @@ func getDirectoryDomainAlias(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
+	// Set default value to my_customer, to represent current account
+	customerID := "my_customer"
+	if d.KeyColumnQuals["customer_id"] != nil {
+		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	}
 	domainAliasName := d.KeyColumnQuals["domain_alias_name"].GetStringValue()
 
 	// Return nil, if no input provided
@@ -113,7 +136,7 @@ func getDirectoryDomainAlias(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, nil
 	}
 
-	resp, err := service.DomainAliases.Get("my_customer", domainAliasName).Do()
+	resp, err := service.DomainAliases.Get(customerID, domainAliasName).Do()
 	if err != nil {
 		return nil, err
 	}

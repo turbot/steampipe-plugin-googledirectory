@@ -27,3 +27,17 @@ from
 where
   not verified;
 ```
+
+### List domain aliases by parent domain
+
+```sql
+select
+  domain_alias_name,
+  parent_domain_name,
+  creation_time,
+  verified
+from
+  googledirectory_domain_alias
+where
+  parent_domain_name = 'domain.com';
+```
