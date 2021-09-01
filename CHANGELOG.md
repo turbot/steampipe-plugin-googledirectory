@@ -1,3 +1,19 @@
+## v0.0.2 [2021-09-01]
+
+_What's new?_
+
+- New tables added
+  - [googledirectory_domain_alias](https://hub.steampipe.io/plugins/turbot/googledirectory/tables/googledirectory_domain_alias) ([#11](https://github.com/turbot/steampipe-plugin-googledirectory/pull/11))
+  - [googledirectory_role_assignment](https://hub.steampipe.io/plugins/turbot/googledirectory/tables/googledirectory_role_assignment) ([#12](https://github.com/turbot/steampipe-plugin-googledirectory/pull/12))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.5.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v150--2021-08-06) and `google.golang.org/api v0.54.0` ([#17](https://github.com/turbot/steampipe-plugin-googledirectory/pull/17))
+
+_Bug fixes_
+
+- Fixed typos in all table function names ([#6](https://github.com/turbot/steampipe-plugin-googledirectory/pull/6))
+
 ## v0.0.1 [2021-08-12]
 
 _What's new?_
