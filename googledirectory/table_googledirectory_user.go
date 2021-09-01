@@ -38,6 +38,21 @@ func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:      "is_admin",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:      "is_delegated_admin",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:      "suspended",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
 					Name:    "query",
 					Require: plugin.Optional,
 				},
@@ -310,9 +325,11 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	equalQuals := d.KeyColumnQuals
+	quals := d.Quals
 
 	var queryFilter, query string
 	filter := buildUserQueryFilter(equalQuals)
+	filter = append(filter, buildUserBoolNEFilter(quals)...)
 
 	if equalQuals["query"] != nil {
 		queryFilter = equalQuals["query"].GetStringValue()
@@ -386,16 +403,52 @@ func buildUserQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
 	filters := []string{}
 
 	filterQuals := map[string]string{
-		"full_name":   "name",
-		"family_name": "familyName",
-		"given_name":  "givenName",
+		"full_name":          "name",
+		"family_name":        "familyName",
+		"given_name":         "givenName",
+		"is_admin":           "isAdmin",
+		"is_delegated_admin": "isDelegatedAdmin",
+		"suspended":          "isSuspended",
 	}
 
 	for qual, filterColumn := range filterQuals {
 		if equalQuals[qual] != nil {
-			filters = append(filters, fmt.Sprintf("%s='%s'", filterColumn, equalQuals[qual].GetStringValue()))
+			if qual == "is_admin" || qual == "is_delegated_admin" || qual == "suspended" {
+				filters = append(filters, fmt.Sprintf("%s=%t", filterColumn, equalQuals[qual].GetBoolValue()))
+			} else {
+				filters = append(filters, fmt.Sprintf("%s='%s'", filterColumn, equalQuals[qual].GetStringValue()))
+			}
 		}
 	}
+	return filters
+}
 
+func buildUserBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
+	filters := []string{}
+
+	filterQuals := []string{
+		"is_admin",
+		"is_delegated_admin",
+		"suspended",
+	}
+
+	for _, qual := range filterQuals {
+		if quals[qual] != nil {
+			for _, q := range quals[qual].Quals {
+				value := q.Value.GetBoolValue()
+				if q.Operator == "<>" {
+					switch qual {
+					case "is_admin":
+						filters = append(filters, fmt.Sprintf("isAdmin=%t", !value))
+					case "is_delegated_admin":
+						filters = append(filters, fmt.Sprintf("isDelegatedAdmin=%t", !value))
+					case "suspended":
+						filters = append(filters, fmt.Sprintf("isSuspended=%t", !value))
+					}
+					break
+				}
+			}
+		}
+	}
 	return filters
 }
