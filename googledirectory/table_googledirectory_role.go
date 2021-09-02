@@ -103,6 +103,7 @@ func listDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 			// Check if the context is cancelled for query
 			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
 				break
 			}
 		}

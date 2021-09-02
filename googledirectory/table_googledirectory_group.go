@@ -154,13 +154,17 @@ func listDirectoryGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		}
 	}
 
+	var count int64
 	resp := service.Groups.List().Customer(customerID).Query(query).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Groups) error {
 		for _, group := range page.Groups {
 			d.StreamListItem(ctx, group)
+			count++
 
 			// Check if the context is cancelled for query
-			if plugin.IsCancelled(ctx) {
+			// Break for loop if requested no of results achieved
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
 				break
 			}
 		}

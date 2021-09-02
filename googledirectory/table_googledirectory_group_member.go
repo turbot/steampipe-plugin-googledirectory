@@ -102,10 +102,29 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plug
 		role = d.KeyColumnQuals["role"].GetStringValue()
 	}
 
-	resp := service.Members.List(groupID).Roles(role)
+	// By default, API can return maximum 200 records in a single page
+	maxResult := int64(200)
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < maxResult {
+			maxResult = *limit
+		}
+	}
+
+	var count int64
+	resp := service.Members.List(groupID).Roles(role).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
 		for _, member := range page.Members {
 			d.StreamListItem(ctx, member)
+			count++
+
+			// Check if the context is cancelled for query
+			// Break for loop if requested no of results achieved
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
+				break
+			}
 		}
 		return nil
 	}); err != nil {

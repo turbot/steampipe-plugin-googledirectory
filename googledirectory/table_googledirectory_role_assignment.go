@@ -129,6 +129,7 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 
 			// Check if the context is cancelled for query
 			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
 				break
 			}
 		}

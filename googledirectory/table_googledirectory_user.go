@@ -347,13 +347,27 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
 
-	resp := service.Users.List().Customer(customerID).Query(query)
+	// By default, API can return maximum 500 records in a single page
+	maxResult := int64(500)
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < maxResult {
+			maxResult = *limit
+		}
+	}
+
+	var count int64
+	resp := service.Users.List().Customer(customerID).Query(query).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Users) error {
 		for _, user := range page.Users {
 			d.StreamListItem(ctx, user)
+			count++
 
 			// Check if the context is cancelled for query
-			if plugin.IsCancelled(ctx) {
+			// Break for loop if requested no of results achieved
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
 				break
 			}
 		}
