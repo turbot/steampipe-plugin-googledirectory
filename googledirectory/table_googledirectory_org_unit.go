@@ -106,6 +106,11 @@ func listDirectoryOrgUnits(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	for _, orgUnit := range resp.OrganizationUnits {
 		d.StreamListItem(ctx, orgUnit)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, nil

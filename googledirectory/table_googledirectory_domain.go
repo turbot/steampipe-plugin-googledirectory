@@ -96,6 +96,11 @@ func listDirectoryDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 	for _, user := range resp.Domains {
 		d.StreamListItem(ctx, user)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, nil

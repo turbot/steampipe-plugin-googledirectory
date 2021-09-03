@@ -101,7 +101,7 @@ func listDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		for _, role := range page.Items {
 			d.StreamListItem(ctx, role)
 
-			// Check if the context is cancelled for query
+			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if plugin.IsCancelled(ctx) {
 				page.NextPageToken = ""
 				break

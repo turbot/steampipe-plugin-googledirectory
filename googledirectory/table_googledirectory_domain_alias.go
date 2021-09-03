@@ -108,6 +108,11 @@ func listDirectoryDomainAliases(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 	for _, domainAlias := range resp.DomainAliases {
 		d.StreamListItem(ctx, domainAlias)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, nil

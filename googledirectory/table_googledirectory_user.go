@@ -357,16 +357,13 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 	}
 
-	var count int64
 	resp := service.Users.List().Customer(customerID).Query(query).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Users) error {
 		for _, user := range page.Users {
 			d.StreamListItem(ctx, user)
-			count++
 
-			// Check if the context is cancelled for query
-			// Break for loop if requested no of results achieved
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
 				page.NextPageToken = ""
 				break
 			}

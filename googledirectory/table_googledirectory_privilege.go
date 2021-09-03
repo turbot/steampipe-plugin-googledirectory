@@ -92,6 +92,11 @@ func listDirectoryPrivileges(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	for _, role := range resp.Items {
 		d.StreamListItem(ctx, role)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, err
