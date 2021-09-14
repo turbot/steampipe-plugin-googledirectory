@@ -56,7 +56,7 @@ steampipe plugin install googledirectory
 | :---------- | :-----------|
 | Credentials | Generate your [service account and credentials](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_credentials) and [delegate domain-wide authority to your service account](https://developers.google.com/admin-sdk/directory/v1/guides/delegation#delegate_domain-wide_authority_to_your_service_account). Enter the following OAuth 2.0 scopes for the services that the service account can access:<br />`https://www.googleapis.com/auth/admin.directory.customer.readonly`<br />`https://www.googleapis.com/auth/admin.directory.domain.readonly`<br />`https://www.googleapis.com/auth/admin.directory.group.member.readonly`<br />`https://www.googleapis.com/auth/admin.directory.group.readonly`<br />`https://www.googleapis.com/auth/admin.directory.orgunit.readonly`<br />`https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly`<br />`https://www.googleapis.com/auth/admin.directory.user.alias.readonly`<br />`https://www.googleapis.com/auth/admin.directory.user.readonly`<br />`https://www.googleapis.com/auth/admin.directory.user.security` |
 | Radius      | Each connection represents a single Google Workspace account. |
-| Resolution  | 1. Credentials from the JSON file specified by the `credential_file` parameter in your steampipe config. |
+| Resolution  | Credentials from the JSON file specified by the `credential_file` parameter in your steampipe config. |
 
 ### Configuration
 
