@@ -2,6 +2,8 @@ package googledirectory
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -24,10 +26,38 @@ func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:    "full_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "family_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "given_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:      "is_admin",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:      "is_delegated_admin",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:      "suspended",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
 					Name:    "query",
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "primary_email"}),
@@ -294,21 +324,49 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
+	equalQuals := d.KeyColumnQuals
+	quals := d.Quals
+
+	var queryFilter, query string
+	filter := buildUserQueryFilter(equalQuals)
+	filter = append(filter, buildUserBoolNEFilter(quals)...)
+
+	if equalQuals["query"] != nil {
+		queryFilter = equalQuals["query"].GetStringValue()
+	}
+
+	if queryFilter != "" {
+		query = queryFilter
+	} else if len(filter) > 0 {
+		query = strings.Join(filter, " ")
+	}
+
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
 	if d.KeyColumnQuals["customer_id"] != nil {
 		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
 	}
 
-	var query string
-	if d.KeyColumnQuals["query"] != nil {
-		query = d.KeyColumnQuals["query"].GetStringValue()
+	// By default, API can return maximum 500 records in a single page
+	maxResult := int64(500)
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < maxResult {
+			maxResult = *limit
+		}
 	}
 
-	resp := service.Users.List().Customer(customerID).Query(query)
+	resp := service.Users.List().Customer(customerID).Query(query).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Users) error {
 		for _, user := range page.Users {
 			d.StreamListItem(ctx, user)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
+				break
+			}
 		}
 		return nil
 	}); err != nil {
@@ -350,4 +408,58 @@ func getDirectoryUser(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	return resp, nil
+}
+
+func buildUserQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
+	filters := []string{}
+
+	filterQuals := map[string]string{
+		"full_name":          "name",
+		"family_name":        "familyName",
+		"given_name":         "givenName",
+		"is_admin":           "isAdmin",
+		"is_delegated_admin": "isDelegatedAdmin",
+		"suspended":          "isSuspended",
+	}
+
+	for qual, filterColumn := range filterQuals {
+		if equalQuals[qual] != nil {
+			if qual == "is_admin" || qual == "is_delegated_admin" || qual == "suspended" {
+				filters = append(filters, fmt.Sprintf("%s=%t", filterColumn, equalQuals[qual].GetBoolValue()))
+			} else {
+				filters = append(filters, fmt.Sprintf("%s='%s'", filterColumn, equalQuals[qual].GetStringValue()))
+			}
+		}
+	}
+	return filters
+}
+
+func buildUserBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
+	filters := []string{}
+
+	filterQuals := []string{
+		"is_admin",
+		"is_delegated_admin",
+		"suspended",
+	}
+
+	for _, qual := range filterQuals {
+		if quals[qual] != nil {
+			for _, q := range quals[qual].Quals {
+				value := q.Value.GetBoolValue()
+				if q.Operator == "<>" {
+					switch qual {
+					case "is_admin":
+						filters = append(filters, fmt.Sprintf("isAdmin=%t", !value))
+					case "is_delegated_admin":
+						filters = append(filters, fmt.Sprintf("isDelegatedAdmin=%t", !value))
+					case "suspended":
+						filters = append(filters, fmt.Sprintf("isSuspended=%t", !value))
+					}
+					break
+				}
+			}
+		}
+	}
+	return filters
 }

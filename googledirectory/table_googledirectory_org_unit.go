@@ -22,6 +22,7 @@ func tableGoogleDirectoryOrgUnit(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"org_unit_id", "org_unit_path"}),
@@ -105,6 +106,11 @@ func listDirectoryOrgUnits(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	for _, orgUnit := range resp.OrganizationUnits {
 		d.StreamListItem(ctx, orgUnit)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, nil

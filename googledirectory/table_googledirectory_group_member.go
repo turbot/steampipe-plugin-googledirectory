@@ -18,8 +18,18 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 		Name:        "googledirectory_group_member",
 		Description: "Group members defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
-			Hydrate:    listDirectoryGroupMembers,
-			KeyColumns: plugin.SingleColumn("group_id"),
+			Hydrate: listDirectoryGroupMembers,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "group_id",
+					Require: plugin.Required,
+				},
+				{
+					Name:    "role",
+					Require: plugin.Optional,
+				},
+			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"group_id", "id"}),
@@ -87,10 +97,31 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plug
 	}
 	groupID := d.KeyColumnQuals["group_id"].GetStringValue()
 
-	resp := service.Members.List(groupID)
+	var role string
+	if d.KeyColumnQuals["role"] != nil {
+		role = d.KeyColumnQuals["role"].GetStringValue()
+	}
+
+	// By default, API can return maximum 200 records in a single page
+	maxResult := int64(200)
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < maxResult {
+			maxResult = *limit
+		}
+	}
+
+	resp := service.Members.List(groupID).Roles(role).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
 		for _, member := range page.Members {
 			d.StreamListItem(ctx, member)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
+				break
+			}
 		}
 		return nil
 	}); err != nil {

@@ -26,7 +26,7 @@ func tableGoogleDirectoryDomainAlias(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -108,6 +108,11 @@ func listDirectoryDomainAliases(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 	for _, domainAlias := range resp.DomainAliases {
 		d.StreamListItem(ctx, domainAlias)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, nil

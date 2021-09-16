@@ -22,6 +22,7 @@ func tableGoogleDirectoryPrivilege(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -91,6 +92,11 @@ func listDirectoryPrivileges(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	for _, role := range resp.Items {
 		d.StreamListItem(ctx, role)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			break
+		}
 	}
 
 	return nil, err

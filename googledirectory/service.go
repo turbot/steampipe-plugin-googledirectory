@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io/ioutil"
-	"os"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -56,11 +55,6 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 	}
 	if googledirectoryConfig.ImpersonatedUserEmail != nil {
 		impersonateUser = *googledirectoryConfig.ImpersonatedUserEmail
-	}
-
-	// If credential path not mentioned in steampipe config, search for env variable
-	if credentialPath == "" {
-		credentialPath = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	}
 
 	// Credentials not set
