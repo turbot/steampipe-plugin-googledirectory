@@ -1,3 +1,17 @@
+## v0.0.3 [2021-09-16]
+
+_What's new?_
+
+- Added: Additional optional key columns and better filtering capabilities to `googledirectory_group`, `googledirectory_group_member`, and `googledirectory_user` tables ([#20](https://github.com/turbot/steampipe-plugin-googledirectory/pull/20))
+
+_Enhancements_
+
+- Updated: Improve context cancellation handling in all tables ([#20](https://github.com/turbot/steampipe-plugin-googledirectory/pull/20))
+
+_Bug fixes_
+
+- Fixed: Remove check for credentials in `GOOGLE_APPLICATION_CREDENTIALS` environment variable to align with Google's authentication methods ([#20](https://github.com/turbot/steampipe-plugin-googledirectory/pull/20))
+
 ## v0.0.2 [2021-09-01]
 
 _What's new?_
