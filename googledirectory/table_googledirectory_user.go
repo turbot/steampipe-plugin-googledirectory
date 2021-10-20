@@ -57,7 +57,7 @@ func tableGoogleDirectoryUser(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"403", "404"}),
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id", "primary_email"}),
