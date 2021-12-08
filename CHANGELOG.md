@@ -1,3 +1,10 @@
+## v0.1.0 [2021-12-08]
+
+_Enhancements_
+
+- Recompiled plugin with Go version 1.17 ([#28](https://github.com/turbot/steampipe-plugin-googledirectory/pull/28))
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v182--2021-11-22) ([#27](https://github.com/turbot/steampipe-plugin-googledirectory/pull/27))
+
 ## v0.0.4 [2021-10-20]
 
 _Bug fixes_
