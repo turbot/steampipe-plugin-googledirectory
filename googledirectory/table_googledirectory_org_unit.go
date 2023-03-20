@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -95,8 +95,8 @@ func listDirectoryOrgUnits(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	resp, err := service.Orgunits.List(customerID).Do()
@@ -127,8 +127,8 @@ func getDirectoryOrgUnit(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	orgUnitID := d.KeyColumnQuals["org_unit_id"].GetStringValue()
-	orgUnitPath := d.KeyColumnQuals["org_unit_path"].GetStringValue()
+	orgUnitID := d.EqualsQuals["org_unit_id"].GetStringValue()
+	orgUnitPath := d.EqualsQuals["org_unit_path"].GetStringValue()
 
 	// Return nil, if no input provided
 	if orgUnitID == "" && orgUnitPath == "" {

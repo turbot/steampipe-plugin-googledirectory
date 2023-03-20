@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -86,8 +86,8 @@ func listDirectoryDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	resp, err := service.Domains.List(customerID).Do()
@@ -117,7 +117,7 @@ func getDirectoryDomain(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	domainName := d.KeyColumnQuals["domain_name"].GetStringValue()
+	domainName := d.EqualsQuals["domain_name"].GetStringValue()
 
 	// Return nil, if no input provided
 	if domainName == "" {

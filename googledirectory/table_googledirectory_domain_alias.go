@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -94,12 +94,12 @@ func listDirectoryDomainAliases(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 	var parentDomainName string
-	if d.KeyColumnQuals["parent_domain_name"] != nil {
-		parentDomainName = d.KeyColumnQuals["parent_domain_name"].GetStringValue()
+	if d.EqualsQuals["parent_domain_name"] != nil {
+		parentDomainName = d.EqualsQuals["parent_domain_name"].GetStringValue()
 	}
 
 	resp, err := service.DomainAliases.List(customerID).ParentDomainName(parentDomainName).Do()
@@ -131,10 +131,10 @@ func getDirectoryDomainAlias(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
-	domainAliasName := d.KeyColumnQuals["domain_alias_name"].GetStringValue()
+	domainAliasName := d.EqualsQuals["domain_alias_name"].GetStringValue()
 
 	// Return nil, if no input provided
 	if domainAliasName == "" {

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -119,12 +119,12 @@ func listDirectoryGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	var queryFilter, query string
 	var filter []string
 
-	if d.KeyColumnQuals["name"] != nil {
-		filter = append(filter, fmt.Sprintf("name='%s'", d.KeyColumnQuals["name"].GetStringValue()))
+	if d.EqualsQuals["name"] != nil {
+		filter = append(filter, fmt.Sprintf("name='%s'", d.EqualsQuals["name"].GetStringValue()))
 	}
 
-	if d.KeyColumnQuals["query"] != nil {
-		queryFilter = d.KeyColumnQuals["query"].GetStringValue()
+	if d.EqualsQuals["query"] != nil {
+		queryFilter = d.EqualsQuals["query"].GetStringValue()
 	}
 
 	if queryFilter != "" {
@@ -140,8 +140,8 @@ func listDirectoryGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	// By default, API can return maximum 200 records in a single page
@@ -184,8 +184,8 @@ func getDirectoryGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-	email := d.KeyColumnQuals["email"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
+	email := d.EqualsQuals["email"].GetStringValue()
 
 	// Return nil, if no input provided
 	if id == "" && email == "" {

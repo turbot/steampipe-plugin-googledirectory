@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -324,7 +324,7 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	quals := d.Quals
 
 	var queryFilter, query string
@@ -343,8 +343,8 @@ func listDirectoryUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	// By default, API can return maximum 500 records in a single page
@@ -387,8 +387,8 @@ func getDirectoryUser(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-	primaryEmail := d.KeyColumnQuals["primary_email"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
+	primaryEmail := d.EqualsQuals["primary_email"].GetStringValue()
 
 	// Return nil, if no input provided
 	if id == "" && primaryEmail == "" {
