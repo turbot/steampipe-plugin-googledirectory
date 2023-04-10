@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 	"google.golang.org/api/googleapi"
@@ -95,11 +95,11 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plug
 	if err != nil {
 		return nil, err
 	}
-	groupID := d.KeyColumnQuals["group_id"].GetStringValue()
+	groupID := d.EqualsQuals["group_id"].GetStringValue()
 
 	var role string
-	if d.KeyColumnQuals["role"] != nil {
-		role = d.KeyColumnQuals["role"].GetStringValue()
+	if d.EqualsQuals["role"] != nil {
+		role = d.EqualsQuals["role"].GetStringValue()
 	}
 
 	// By default, API can return maximum 200 records in a single page
@@ -149,11 +149,11 @@ func getDirectoryGroupMember(ctx context.Context, d *plugin.QueryData, h *plugin
 	var groupID, memberID string
 	if h.Item != nil {
 		data := h.Item.(*admin.Member)
-		groupID = d.KeyColumnQuals["group_id"].GetStringValue()
+		groupID = d.EqualsQuals["group_id"].GetStringValue()
 		memberID = data.Id
 	} else {
-		groupID = d.KeyColumnQuals["group_id"].GetStringValue()
-		memberID = d.KeyColumnQuals["id"].GetStringValue()
+		groupID = d.EqualsQuals["group_id"].GetStringValue()
+		memberID = d.EqualsQuals["id"].GetStringValue()
 	}
 
 	// Return nil, if no input provided

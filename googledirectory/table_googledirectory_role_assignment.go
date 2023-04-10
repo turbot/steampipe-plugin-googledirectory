@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -110,18 +110,18 @@ func listDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ *p
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	var roleId string
-	if d.KeyColumnQuals["role_id"] != nil {
-		roleId = d.KeyColumnQuals["role_id"].GetStringValue()
+	if d.EqualsQuals["role_id"] != nil {
+		roleId = d.EqualsQuals["role_id"].GetStringValue()
 	}
 
 	resp := service.RoleAssignments.List(customerID).RoleId(roleId)
-	if d.KeyColumnQuals["user_key"] != nil {
-		resp.UserKey(d.KeyColumnQuals["user_key"].GetStringValue())
+	if d.EqualsQuals["user_key"] != nil {
+		resp.UserKey(d.EqualsQuals["user_key"].GetStringValue())
 	}
 	if err := resp.Pages(ctx, func(page *admin.RoleAssignments) error {
 		for _, assignment := range page.Items {
@@ -154,10 +154,10 @@ func getDirectoryRoleAssignment(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
-	roleAssignmentId := d.KeyColumnQuals["role_assignment_id"].GetStringValue()
+	roleAssignmentId := d.EqualsQuals["role_assignment_id"].GetStringValue()
 
 	// Return nil, if no input provided
 	if roleAssignmentId == "" {

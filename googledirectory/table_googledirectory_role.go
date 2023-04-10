@@ -3,9 +3,9 @@ package googledirectory
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	admin "google.golang.org/api/admin/directory/v1"
 )
@@ -92,8 +92,8 @@ func listDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	// Set default value to my_customer, to represent current account
 	customerID := "my_customer"
-	if d.KeyColumnQuals["customer_id"] != nil {
-		customerID = d.KeyColumnQuals["customer_id"].GetStringValue()
+	if d.EqualsQuals["customer_id"] != nil {
+		customerID = d.EqualsQuals["customer_id"].GetStringValue()
 	}
 
 	resp := service.Roles.List(customerID)
@@ -126,7 +126,7 @@ func getDirectoryRole(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	roleID := d.KeyColumnQuals["role_id"].GetStringValue()
+	roleID := d.EqualsQuals["role_id"].GetStringValue()
 
 	// Return nil, if no input provided
 	if roleID == "" {
