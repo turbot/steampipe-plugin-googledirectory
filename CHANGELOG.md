@@ -7,7 +7,6 @@ _Dependencies_
 - Recompiled plugin with `github.com/aws/aws-sdk-go v1.34.0`. ([#47](https://github.com/turbot/steampipe-plugin-googledirectory/pull/47))
 - Recompiled plugin with `golang.org/x/net v0.7.0`. ([#49](https://github.com/turbot/steampipe-plugin-googledirectory/pull/49))
 - Recompiled plugin with `github.com/turbot/go-kit v0.7.0`. ([#51](https://github.com/turbot/steampipe-plugin-googledirectory/pull/51))
-- Recompiled plugin with `dependabot.yml` to test version updates.
 
 ## v0.5.0 [2023-04-10]
 
