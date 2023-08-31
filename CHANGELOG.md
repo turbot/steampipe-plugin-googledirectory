@@ -1,3 +1,13 @@
+## v0.6.0 [2023-08-31]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.5.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v551-2023-07-26). ([#50](https://github.com/turbot/steampipe-plugin-googledirectory/pull/50))
+- Recompiled plugin with `google.golang.org/api v0.138.0`. ([#52](https://github.com/turbot/steampipe-plugin-googledirectory/pull/52))
+- Recompiled plugin with `github.com/aws/aws-sdk-go v1.34.0`. ([#47](https://github.com/turbot/steampipe-plugin-googledirectory/pull/47))
+- Recompiled plugin with `golang.org/x/net v0.7.0`. ([#49](https://github.com/turbot/steampipe-plugin-googledirectory/pull/49))
+- Recompiled plugin with `github.com/turbot/go-kit v0.7.0`. ([#51](https://github.com/turbot/steampipe-plugin-googledirectory/pull/51))
+
 ## v0.5.0 [2023-04-10]
 
 _Dependencies_
