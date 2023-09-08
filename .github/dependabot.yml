@@ -9,3 +9,14 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "[dep][go]"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    assignees:
+      - "misraved"
+      - "madhushreeray30"
+    labels:
+      - "dependencies"
+      - "house-keeping"
