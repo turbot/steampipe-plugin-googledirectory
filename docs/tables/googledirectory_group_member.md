@@ -1,14 +1,20 @@
-# Table: googledirectory_group_member
+---
+title: "Steampipe Table: googledirectory_group_member - Query Google Directory Group Members using SQL"
+description: "Allows users to query Google Directory Group Members, specifically providing details about each member of a group, their roles, and type."
+---
 
-Query information about group members defined in the Google Workspace directory.
+# Table: googledirectory_group_member - Query Google Directory Group Members using SQL
 
-**Note:**
+Google Directory is a service within Google Workspace that provides a centralized way to manage and organize users, groups, and devices in an organization. It allows administrators to manage access to services and delegate administrative tasks. Google Directory Group Member represents a member of a group within the Google Directory.
 
-- A specific `group_id` must be defined in all queries to this table.
+## Table Usage Guide
+
+The `googledirectory_group_member` table provides insights into each member of a group within Google Directory. As an IT administrator, explore member-specific details through this table, including roles, type, and associated metadata. Utilize it to uncover information about group members, such as their roles within the group, the type of member (user, group, or service account), and other relevant details.
 
 ## Examples
 
 ### Basic info
+Explore which roles are assigned to different members of a specific Google Directory group. This is useful for managing access permissions and ensuring the right individuals have the appropriate roles.
 
 ```sql
 select
@@ -23,6 +29,7 @@ where
 ```
 
 ### List all owners of a group
+Discover the segments that have a specific ownership within a group. This can be useful for managing group permissions and understanding the distribution of roles within a group.
 
 ```sql
 select
@@ -38,6 +45,7 @@ where
 ```
 
 ### List role counts for a group
+Explore which roles within a specific group have the highest membership count. This can help in understanding the distribution of roles within the group, allowing for better management and organization.
 
 ```sql
 select
@@ -53,6 +61,7 @@ order by
 ```
 
 ### List all groups and their members
+Explore the relationships between various groups and their respective members to understand the structure and dynamics within your organization. This can be particularly useful for managing access permissions, coordinating team activities, or identifying communication patterns.
 
 ```sql
 select
