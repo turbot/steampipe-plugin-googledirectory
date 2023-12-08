@@ -16,7 +16,17 @@ The `googledirectory_privilege` table provides insights into the privileges with
 ### Basic info
 Explore which privileges within the Google Directory service are applicable to Organizational Units. This can aid in understanding the scope of access control and managing permissions effectively.
 
-```sql
+```sql+postgres
+select
+  privilege_name,
+  service_name,
+  service_id,
+  is_ou_scopable
+from
+  googledirectory_privilege;
+```
+
+```sql+sqlite
 select
   privilege_name,
   service_name,
@@ -29,7 +39,7 @@ from
 ### List privileges by service
 Explore the distribution of privileges across different services. This can help in assessing the security posture by identifying services with a high count of privileges.
 
-```sql
+```sql+postgres
 select
   service_name,
   count(*)
@@ -41,10 +51,22 @@ order by
   count desc;
 ```
 
+```sql+sqlite
+select
+  service_name,
+  count(*)
+from
+  googledirectory_privilege
+group by
+  service_name
+order by
+  count(*) desc;
+```
+
 ### List privileges for each role
 This example allows you to examine the specific permissions associated with each role within your Google Directory. It's useful for ensuring that roles are correctly configured and that each role has the appropriate level of access, enhancing your overall security posture.
 
-```sql
+```sql+postgres
 select
   r.role_name as role_name,
   p.service_name as service_name,
@@ -56,6 +78,24 @@ from
 where
   rp ->> 'serviceId' = p.service_id
   and rp ->> 'privilegeName' = p.privilege_name
+order by
+  role_name,
+  service_name,
+  privilege_name;
+```
+
+```sql+sqlite
+select
+  r.role_name as role_name,
+  p.service_name as service_name,
+  p.privilege_name as privilege_name
+from
+  googledirectory_role as r,
+  json_each(r.role_privileges) as rp,
+  googledirectory_privilege as p
+where
+  json_extract(rp.value, '$.serviceId') = p.service_id
+  and json_extract(rp.value, '$.privilegeName') = p.privilege_name
 order by
   role_name,
   service_name,

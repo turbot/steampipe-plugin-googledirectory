@@ -16,7 +16,17 @@ The `googledirectory_org_unit` table provides insights into organizational units
 ### Basic info
 Explore the organization structure within Google Directory to understand its hierarchy and descriptions. This can be beneficial for managing resources and permissions within your organization.
 
-```sql
+```sql+postgres
+select
+  name,
+  org_unit_id,
+  org_unit_path,
+  description
+from
+  googledirectory_org_unit;
+```
+
+```sql+sqlite
 select
   name,
   org_unit_id,
@@ -29,7 +39,19 @@ from
 ### Get org unit by ID
 Explore the specific organizational unit within Google Directory by using its unique ID. This assists in obtaining detailed information about the unit, such as its name, path, and description, which can be useful for managing and understanding the structure of your organization.
 
-```sql
+```sql+postgres
+select
+  name,
+  org_unit_id,
+  org_unit_path,
+  description
+from
+  googledirectory_org_unit
+where
+  org_unit_id = 'id:03pk8a4z4t34g1w';
+```
+
+```sql+sqlite
 select
   name,
   org_unit_id,
@@ -44,7 +66,19 @@ where
 ### Get org unit by path
 Explore the specific organizational unit within your Google Directory by its unique path. This allows you to obtain crucial details about the unit, such as its name and description, which can be beneficial for managing your organizational structure.
 
-```sql
+```sql+postgres
+select
+  name,
+  org_unit_id,
+  org_unit_path,
+  description
+from
+  googledirectory_org_unit
+where
+  org_unit_path = '/DM';
+```
+
+```sql+sqlite
 select
   name,
   org_unit_id,

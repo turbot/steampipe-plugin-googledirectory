@@ -19,7 +19,19 @@ The `googledirectory_group_member` table provides insights into each member of a
 ### Basic info
 Explore which roles are assigned to different members of a specific Google Directory group. This is useful for managing access permissions and ensuring the right individuals have the appropriate roles.
 
-```sql
+```sql+postgres
+select
+  group_id,
+  id,
+  email,
+  role
+from
+  googledirectory_group_member
+where
+  group_id = '01ksv4uv1gexk1h';
+```
+
+```sql+sqlite
 select
   group_id,
   id,
@@ -34,7 +46,20 @@ where
 ### List all owners of a group
 Discover the segments that have a specific ownership within a group. This can be useful for managing group permissions and understanding the distribution of roles within a group.
 
-```sql
+```sql+postgres
+select
+  group_id,
+  id,
+  email,
+  role
+from
+  googledirectory_group_member
+where
+  group_id = '01ksv4uv1gexk1h'
+  and role = 'OWNER';
+```
+
+```sql+sqlite
 select
   group_id,
   id,
@@ -50,7 +75,7 @@ where
 ### List role counts for a group
 Explore which roles within a specific group have the highest membership count. This can help in understanding the distribution of roles within the group, allowing for better management and organization.
 
-```sql
+```sql+postgres
 select
   role,
   count(*)
@@ -63,10 +88,23 @@ order by
   count desc;
 ```
 
+```sql+sqlite
+select
+  role,
+  count(*)
+from
+  googledirectory_group_member
+where
+  group_id = '01ksv4uv1gexk1h'
+group by role
+order by
+  count(*) desc;
+```
+
 ### List all groups and their members
 Explore the relationships between various groups and their respective members to understand the structure and dynamics within your organization. This can be particularly useful for managing access permissions, coordinating team activities, or identifying communication patterns.
 
-```sql
+```sql+postgres
 select
   g.id as group_id,
   g.name as group_name,
@@ -76,6 +114,20 @@ from
   googledirectory_group_member as m
 where
   g.id = m.group_id
+order by
+  g.name,
+  m.email;
+```
+
+```sql+sqlite
+select
+  g.id as group_id,
+  g.name as group_name,
+  m.email as member_email
+from
+  googledirectory_group as g
+join
+  googledirectory_group_member as m on g.id = m.group_id
 order by
   g.name,
   m.email;

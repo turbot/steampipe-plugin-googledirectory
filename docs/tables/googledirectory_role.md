@@ -16,7 +16,17 @@ The `googledirectory_role` table provides insights into roles within Google Work
 ### Basic info
 Analyze the settings to understand the roles within your Google Directory, specifically identifying which roles have super admin or system privileges. This can be useful for auditing access rights and maintaining security within your organization.
 
-```sql
+```sql+postgres
+select
+  role_name,
+  role_id,
+  is_super_admin_role,
+  is_system_role
+from
+  googledirectory_role;
+```
+
+```sql+sqlite
 select
   role_name,
   role_id,
@@ -29,7 +39,19 @@ from
 ### Get role by ID
 Explore which Google Directory roles possess certain identifiers, enabling you to pinpoint specific roles for administrative or system purposes. This is useful in managing user access and permissions in your Google Directory.
 
-```sql
+```sql+postgres
+select
+  role_name,
+  role_id,
+  is_super_admin_role,
+  is_system_role
+from
+  googledirectory_role
+where
+  role_id = '02ce457p6conzyd';
+```
+
+```sql+sqlite
 select
   role_name,
   role_id,
@@ -44,7 +66,7 @@ where
 ### List super admin roles
 Explore which roles hold super admin privileges in your Google Directory, to manage permissions and secure your system effectively. This query helps you identify those roles, providing valuable information for system administration and security.
 
-```sql
+```sql+postgres
 select
   role_id,
   role_name,
@@ -56,10 +78,22 @@ where
   is_super_admin_role;
 ```
 
+```sql+sqlite
+select
+  role_id,
+  role_name,
+  is_super_admin_role,
+  is_system_role
+from
+  googledirectory_role
+where
+  is_super_admin_role = 1;
+```
+
 ### List system roles
 Discover the segments that identify all system roles in the Google Directory, providing a way to assess which roles have super admin privileges. This can be beneficial for auditing purposes or to manage user permissions effectively.
 
-```sql
+```sql+postgres
 select
   role_id,
   role_name,
@@ -71,10 +105,22 @@ where
   is_system_role;
 ```
 
+```sql+sqlite
+select
+  role_id,
+  role_name,
+  is_super_admin_role,
+  is_system_role
+from
+  googledirectory_role
+where
+  is_system_role = 1;
+```
+
 ### List privileges by role
 Explore which privileges are associated with each role in Google Directory. This can be useful in managing access control and ensuring that each role has the correct privileges for its intended function.
 
-```sql
+```sql+postgres
 select
   role_name,
   p ->> 'serviceId' as service_id,
@@ -82,6 +128,20 @@ select
 from
   googledirectory_role as r,
   jsonb_array_elements(r.role_privileges) as p
+order by
+  role_name,
+  service_id,
+  privilege;
+```
+
+```sql+sqlite
+select
+  role_name,
+  json_extract(p.value, '$.serviceId') as service_id,
+  json_extract(p.value, '$.privilegeName') as privilege
+from
+  googledirectory_role as r,
+  json_each(r.role_privileges) as p
 order by
   role_name,
   service_id,

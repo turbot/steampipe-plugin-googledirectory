@@ -16,7 +16,16 @@ The `googledirectory_domain_alias` table provides insights into domain aliases w
 ### Basic info
 Explore which domain aliases in your Google Directory have been verified and when they were created. This can be used to maintain a secure and organized domain structure.
 
-```sql
+```sql+postgres
+select
+  domain_alias_name,
+  creation_time,
+  verified
+from
+  googledirectory_domain_alias;
+```
+
+```sql+sqlite
 select
   domain_alias_name,
   creation_time,
@@ -28,7 +37,18 @@ from
 ### List unverified domain aliases
 Discover the segments that consist of unverified domain aliases, enabling you to identify potential areas of risk and take appropriate action to verify them.
 
-```sql
+```sql+postgres
+select
+  domain_alias_name,
+  creation_time,
+  verified
+from
+  googledirectory_domain_alias
+where
+  not verified;
+```
+
+```sql+sqlite
 select
   domain_alias_name,
   creation_time,
@@ -42,7 +62,19 @@ where
 ### List domain aliases by parent domain
 Explore the different domain aliases associated with a specific parent domain. This can be useful for understanding the structure and organization of your domain aliases, as well as for verifying their creation times and statuses.
 
-```sql
+```sql+postgres
+select
+  domain_alias_name,
+  parent_domain_name,
+  creation_time,
+  verified
+from
+  googledirectory_domain_alias
+where
+  parent_domain_name = 'domain.com';
+```
+
+```sql+sqlite
 select
   domain_alias_name,
   parent_domain_name,

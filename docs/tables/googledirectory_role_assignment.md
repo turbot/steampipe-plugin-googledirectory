@@ -16,7 +16,17 @@ The `googledirectory_role_assignment` table provides insights into Role Assignme
 ### Basic info
 Explore the allocation of roles within your Google Directory setup. This query will help you understand who holds what role and where, enhancing your security management by identifying potential misassignments or gaps.
 
-```sql
+```sql+postgres
+select
+  role_assignment_id,
+  role_id,
+  assigned_to,
+  scope_type
+from
+  googledirectory_role_assignment;
+```
+
+```sql+sqlite
 select
   role_assignment_id,
   role_id,
@@ -29,7 +39,19 @@ from
 ### Get role assignments by role ID
 Explore which roles have been assigned to different users within a specific Google Directory role. This can be useful in managing access and permissions in your organization.
 
-```sql
+```sql+postgres
+select
+  role_assignment_id,
+  role_id,
+  assigned_to,
+  scope_type
+from
+  googledirectory_role_assignment
+where
+  role_id = '522363132560015';
+```
+
+```sql+sqlite
 select
   role_assignment_id,
   role_id,
@@ -44,7 +66,7 @@ where
 ### Get role assignments by user
 Explore which roles have been assigned to each user in the Google Directory. This can be useful to understand the permissions and access each user has within the organization.
 
-```sql
+```sql+postgres
 select
   assigned_role.role_assignment_id as role_assignment_id,
   r.role_name as role_name,
@@ -56,4 +78,15 @@ from
 where
   assigned_role.user_key = u.id
   and assigned_role.role_id = r.role_id;
+```
+
+```sql+sqlite
+select
+  assigned_role.role_assignment_id as role_assignment_id,
+  r.role_name as role_name,
+  u.full_name as user_name
+from
+  googledirectory_role_assignment as assigned_role
+join googledirectory_user as u on assigned_role.user_key = u.id
+join googledirectory_role as r on assigned_role.role_id = r.role_id;
 ```

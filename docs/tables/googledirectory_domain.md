@@ -16,7 +16,16 @@ The `googledirectory_domain` table provides insights into domains within Google 
 ### Basic info
 Explore which domains within your Google Directory are primary and when they were created. This can be beneficial for assessing domain configurations and understanding their establishment timeline.
 
-```sql
+```sql+postgres
+select
+  domain_name,
+  creation_time,
+  is_primary
+from
+  googledirectory_domain;
+```
+
+```sql+sqlite
 select
   domain_name,
   creation_time,
@@ -28,7 +37,18 @@ from
 ### List unverified domains
 Discover the segments that include unverified domains in your Google Directory. This can help you identify potential security risks and take necessary actions to verify these domains.
 
-```sql
+```sql+postgres
+select
+  domain_name,
+  creation_time,
+  verified
+from
+  googledirectory_domain
+where
+  not verified;
+```
+
+```sql+sqlite
 select
   domain_name,
   creation_time,
