@@ -90,11 +90,6 @@ connection "googledirectory" {
 }
 ```
 
-## Get involved
-
-- Open source: https://github.com/turbot/steampipe-plugin-googledirectory
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
-
 ## Advanced configuration options
 
 ### Authenticate using OAuth client
