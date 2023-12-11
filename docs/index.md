@@ -8,6 +8,7 @@ short_name: "googledirectory"
 description: "Steampipe plugin for querying users, groups, org units and more from your Google Workspace directory."
 og_description: "Query Google Workspace directory with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/googledirectory-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Google Directory + Steampipe
