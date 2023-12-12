@@ -8,13 +8,14 @@ short_name: "googledirectory"
 description: "Steampipe plugin for querying users, groups, org units and more from your Google Workspace directory."
 og_description: "Query Google Workspace directory with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/googledirectory-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Google Directory + Steampipe
 
 A [Google Directory](https://developers.google.com/admin-sdk/directory) contains the users, groups, domains and other organizational features of a Google Workspace. [Google Workspace](https://workspace.google.com) is a collection of cloud computing, productivity and collaboration tools, software and products developed and marketed by Google.
 
-[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 For example:
 
@@ -88,11 +89,6 @@ connection "googledirectory" {
   # token_path = "~/.config/gcloud/application_default_credentials.json"
 }
 ```
-
-## Get involved
-
-- Open source: https://github.com/turbot/steampipe-plugin-googledirectory
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
 
 ## Advanced configuration options
 
