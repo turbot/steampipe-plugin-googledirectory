@@ -18,11 +18,12 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 		Name:        "googledirectory_group_member",
 		Description: "Group members defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
-			Hydrate: listDirectoryGroupMembers,
+			ParentHydrate: listDirectoryGroups,
+			Hydrate:       listDirectoryGroupMembers,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "group_id",
-					Require: plugin.Required,
+					Require: plugin.Optional,
 				},
 				{
 					Name:    "role",
@@ -89,13 +90,24 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	var group *admin.Group
+	if h.Item != nil {
+		group = h.Item.(*admin.Group)
+	}
+
 	// Create service
 	service, err := AdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
 	groupID := d.EqualsQuals["group_id"].GetStringValue()
+	
+	// Minimize the API call if group ID is specified in where clause
+	if groupID != group.Id {
+		return nil, nil
+	}
 
 	var role string
 	if d.EqualsQuals["role"] != nil {
@@ -112,7 +124,7 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, _ *plug
 		}
 	}
 
-	resp := service.Members.List(groupID).Roles(role).MaxResults(maxResult)
+	resp := service.Members.List(group.Id).Roles(role).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
 		for _, member := range page.Members {
 			d.StreamListItem(ctx, member)

@@ -12,7 +12,7 @@ Google Directory is a service within Google Workspace that provides a centralize
 The `googledirectory_group_member` table provides insights into each member of a group within Google Directory. As an IT administrator, explore member-specific details through this table, including roles, type, and associated metadata. Utilize it to uncover information about group members, such as their roles within the group, the type of member (user, group, or service account), and other relevant details.
 
 **Important Notes**
-- You must specify the `group_id` in the `where` clause to query this table.
+- You can specify the `group_id` optionally in the `where` clause to get the members associated with a group.
 
 ## Examples
 
