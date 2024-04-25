@@ -96,10 +96,6 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 	}
 }
 
-type ChannelMemberInfo struct {
-	GroupId string
-	*admin.Members
-}
 type MemberInfo struct {
 	GroupId string
 	*admin.Member
@@ -144,7 +140,7 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 	resp := service.Members.List(group.Id).Roles(role).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
 		for _, member := range page.Members {
-			d.StreamListItem(ctx, member)
+			d.StreamListItem(ctx, &MemberInfo{group.Id, member})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if plugin.IsCancelled(ctx) {
