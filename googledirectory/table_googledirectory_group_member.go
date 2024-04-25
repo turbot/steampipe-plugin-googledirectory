@@ -2,11 +2,7 @@ package googledirectory
 
 import (
 	"context"
-	"fmt"
-	"strings"
-	"sync"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -22,8 +18,8 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 		Name:        "googledirectory_group_member",
 		Description: "Group members defined in the Google Workspace directory.",
 		List: &plugin.ListConfig{
-			// ParentHydrate: listDirectoryGroups,
-			Hydrate: listDirectoryGroupMembers,
+			ParentHydrate: listDirectoryGroups,
+			Hydrate:       listDirectoryGroupMembers,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "group_id",
@@ -31,18 +27,6 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 				},
 				{
 					Name:    "role",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "customer_id",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "name",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "query",
 					Require: plugin.Optional,
 				},
 			},
@@ -58,24 +42,6 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 				Description: "Specifies the ID of the group, the user belongs.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("GroupId"),
-			},
-			{
-				Name:        "name",
-				Description: "The group's display name.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Member.Name"),
-			},
-			{
-				Name:        "customer_id",
-				Description: "The customer ID to retrieve all account groups.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("customer_id"),
-			},
-			{
-				Name:        "query",
-				Description: "Filter string to [filter](https://developers.google.com/admin-sdk/directory/v1/guides/search-groups) groups.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("query"),
 			},
 			{
 				Name:        "id",
@@ -142,11 +108,9 @@ type MemberInfo struct {
 //// LIST FUNCTION
 
 func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	var groups []string
-
-	groups, err := listDirectoryGroupForMembers(ctx, d, h)
-	if err != nil {
-		return nil, nil
+	var group *admin.Group
+	if h.Item != nil {
+		group = h.Item.(*admin.Group)
 	}
 
 	// Create service
@@ -158,8 +122,8 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 	groupID := d.EqualsQuals["group_id"].GetStringValue()
 
 	// Minimize the API call if group ID is specified in where clause
-	if helpers.StringSliceContains(groups, groupID) {
-		groups = []string{groupID}
+	if groupID != group.Id {
+		return nil, nil
 	}
 
 	var role string
@@ -177,105 +141,27 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 		}
 	}
 
-	// make parallel API call
-	var wg sync.WaitGroup
-	serviceCh := make(chan *ChannelMemberInfo, 2000)
-	errorCh := make(chan error, 2000)
+	resp := service.Members.List(group.Id).Roles(role).MaxResults(maxResult)
+	if err := resp.Pages(ctx, func(page *admin.Members) error {
+		for _, member := range page.Members {
+			d.StreamListItem(ctx, member)
 
-	for _, g := range groups {
-		wg.Add(1)
-		go listDirectoryGroupMembersByGroupIdAsync(g, role, maxResult, service.Members, &wg, serviceCh, errorCh, ctx)
-	}
-
-	// wait for all services to be processed
-	wg.Wait()
-
-	// NOTE: close channel before ranging over results
-	close(serviceCh)
-	close(errorCh)
-
-	for err := range errorCh {
-		// return the first error
-		return nil, err
-	}
-
-	for result := range serviceCh {
-		for _, service := range result.Members.Members {
-			d.StreamListItem(ctx, MemberInfo{result.GroupId, service})
-
-			// Context may get cancelled due to manual cancellation or if the limit has been reached
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
+				break
 			}
 		}
-	}
-
-	return nil, err
-}
-
-func listDirectoryGroupMembersByGroupIdAsync(groupId string, role string, maxResult int64, client *admin.MembersService, wg *sync.WaitGroup, serviceCh chan *ChannelMemberInfo, errorCh chan error, ctx context.Context) {
-	defer wg.Done()
-	resp := client.List(groupId).Roles(role).MaxResults(maxResult)
-	if err := resp.Pages(ctx, func(page *admin.Members) error {
-		serviceCh <- &ChannelMemberInfo{groupId, page}
 		return nil
 	}); err != nil {
 		// Return nil, if given group is not present
-		if err.(*googleapi.Error).Code != 404 {
-			errorCh <- err
+		if err.(*googleapi.Error).Code == 404 {
+			return nil, nil
 		}
-	}
-}
-
-func listDirectoryGroupForMembers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) ([]string, error) {
-
-	var groups []string
-	service, err := AdminService(ctx, d)
-	if err != nil {
 		return nil, err
 	}
 
-	var queryFilter, query string
-	var filter []string
-
-	if d.EqualsQuals["name"] != nil {
-		filter = append(filter, fmt.Sprintf("name='%s'", d.EqualsQuals["name"].GetStringValue()))
-	}
-
-	if d.EqualsQuals["query"] != nil {
-		queryFilter = d.EqualsQuals["query"].GetStringValue()
-	}
-
-	if queryFilter != "" {
-		query = queryFilter
-	} else if len(filter) > 0 {
-		query = strings.Join(filter, " ")
-	}
-
-	// Since, query parameter can't be empty, set default param name:**, to return all groups
-	if query == "" {
-		query = "name:**"
-	}
-
-	// Set default value to my_customer, to represent current account
-	customerID := "my_customer"
-	if d.EqualsQuals["customer_id"] != nil {
-		customerID = d.EqualsQuals["customer_id"].GetStringValue()
-	}
-
-	// By default, API can return maximum 200 records in a single page
-	maxResult := int64(200)
-
-	resp := service.Groups.List().Customer(customerID).Query(query).MaxResults(maxResult)
-	if err := resp.Pages(ctx, func(page *admin.Groups) error {
-		for _, g := range page.Groups {
-			groups = append(groups, g.Id)
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return groups, nil
+	return nil, err
 }
 
 //// HYDRATE FUNCTIONS
