@@ -57,12 +57,13 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 				Name:        "group_id",
 				Description: "Specifies the ID of the group, the user belongs.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("group_id"),
+				Transform:   transform.FromField("GroupId"),
 			},
 			{
 				Name:        "name",
 				Description: "The group's display name.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Name"),
 			},
 			{
 				Name:        "customer_id",
@@ -80,45 +81,62 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The unique ID of the group member.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Id"),
 			},
 			{
 				Name:        "email",
 				Description: "Specifies the member's email address.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Email"),
 			},
 			{
 				Name:        "role",
 				Description: "Specifies the role of the member in a group.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Role"),
 			},
 			{
 				Name:        "status",
 				Description: "Specifies the status of the member.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Status"),
 			},
 			{
 				Name:        "delivery_settings",
 				Description: "Defines mail delivery preferences of member.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getDirectoryGroupMember,
+				Transform:   transform.FromField("Member.DeliverySettings"),
 			},
 			{
 				Name:        "etag",
 				Description: "A hash of the metadata, used to ensure there were no concurrent modifications to the resource when attempting an update.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Etag"),
 			},
 			{
 				Name:        "kind",
 				Description: "The type of the API resource.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Kind"),
 			},
 			{
 				Name:        "type",
 				Description: "The type of group member.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Member.Type"),
 			},
 		},
 	}
+}
+
+type ChannelMemberInfo struct {
+	GroupId string
+	*admin.Members
+}
+type MemberInfo struct {
+	GroupId string
+	*admin.Member
 }
 
 //// LIST FUNCTION
@@ -161,7 +179,7 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 
 	// make parallel API call
 	var wg sync.WaitGroup
-	serviceCh := make(chan *admin.Members, 2000)
+	serviceCh := make(chan *ChannelMemberInfo, 2000)
 	errorCh := make(chan error, 2000)
 
 	for _, g := range groups {
@@ -182,8 +200,8 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	for result := range serviceCh {
-		for _, service := range result.Members {
-			d.StreamListItem(ctx, service)
+		for _, service := range result.Members.Members {
+			d.StreamListItem(ctx, MemberInfo{result.GroupId, service})
 
 			// Context may get cancelled due to manual cancellation or if the limit has been reached
 			if d.RowsRemaining(ctx) == 0 {
@@ -195,11 +213,11 @@ func listDirectoryGroupMembers(ctx context.Context, d *plugin.QueryData, h *plug
 	return nil, err
 }
 
-func listDirectoryGroupMembersByGroupIdAsync(groupId string, role string, maxResult int64, client *admin.MembersService, wg *sync.WaitGroup, serviceCh chan *admin.Members, errorCh chan error, ctx context.Context) {
+func listDirectoryGroupMembersByGroupIdAsync(groupId string, role string, maxResult int64, client *admin.MembersService, wg *sync.WaitGroup, serviceCh chan *ChannelMemberInfo, errorCh chan error, ctx context.Context) {
 	defer wg.Done()
 	resp := client.List(groupId).Roles(role).MaxResults(maxResult)
 	if err := resp.Pages(ctx, func(page *admin.Members) error {
-		serviceCh <- page
+		serviceCh <- &ChannelMemberInfo{groupId, page}
 		return nil
 	}); err != nil {
 		// Return nil, if given group is not present
@@ -209,7 +227,7 @@ func listDirectoryGroupMembersByGroupIdAsync(groupId string, role string, maxRes
 	}
 }
 
-func listDirectoryGroupForMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) ([]string, error) {
+func listDirectoryGroupForMembers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) ([]string, error) {
 
 	var groups []string
 	service, err := AdminService(ctx, d)
@@ -233,7 +251,6 @@ func listDirectoryGroupForMembers(ctx context.Context, d *plugin.QueryData, h *p
 	} else if len(filter) > 0 {
 		query = strings.Join(filter, " ")
 	}
-
 
 	// Since, query parameter can't be empty, set default param name:**, to return all groups
 	if query == "" {
@@ -292,5 +309,5 @@ func getDirectoryGroupMember(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
-	return resp, nil
+	return &MemberInfo{groupID, resp}, nil
 }
