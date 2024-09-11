@@ -71,7 +71,6 @@ func tableGoogleDirectoryGroupMember(_ context.Context) *plugin.Table {
 				Name:        "delivery_settings",
 				Description: "Defines mail delivery preferences of member.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getDirectoryGroupMember,
 				Transform:   transform.FromField("DeliverySettings"),
 			},
 			{
@@ -171,15 +170,8 @@ func getDirectoryGroupMember(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
-	var groupID, memberID string
-	if h.Item != nil {
-		data := h.Item.(*admin.Member)
-		groupID = d.EqualsQuals["group_id"].GetStringValue()
-		memberID = data.Id
-	} else {
-		groupID = d.EqualsQuals["group_id"].GetStringValue()
-		memberID = d.EqualsQuals["id"].GetStringValue()
-	}
+	groupID := d.EqualsQuals["group_id"].GetStringValue()
+	memberID := d.EqualsQuals["id"].GetStringValue()
 
 	// Return nil, if no input provided
 	if groupID == "" || memberID == "" {
