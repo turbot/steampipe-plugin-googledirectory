@@ -8,14 +8,14 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 	admin "google.golang.org/api/admin/directory/v1"
 )
 
 func AdminService(ctx context.Context, d *plugin.QueryData) (*admin.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "googledirectory.admin"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*admin.Service), nil
 	}
 
@@ -32,7 +32,9 @@ func AdminService(ctx context.Context, d *plugin.QueryData) (*admin.Service, err
 	}
 
 	// cache the service
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("googledirectory.AdminService", "cache_key", serviceCacheKey, "error", err)
+	}
 
 	return svc, nil
 }
@@ -72,7 +74,8 @@ func getSessionConfig(ctx context.Context, d *plugin.QueryData) ([]option.Client
 		if err != nil {
 			return nil, err
 		}
-		opts = append(opts, option.WithCredentialsFile(path))
+		// token_path is operator-supplied config and may hold any credential type, so the type must stay auto-detected
+		opts = append(opts, option.WithCredentialsFile(path)) //nolint:staticcheck
 		return opts, nil
 	}
 
@@ -85,7 +88,7 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 
 	// have we already created and cached the token?
 	cacheKey := "googledirectory.token_source"
-	if ts, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if ts, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return ts.(oauth2.TokenSource), nil
 	}
 
@@ -135,7 +138,9 @@ func getTokenSource(ctx context.Context, d *plugin.QueryData) (oauth2.TokenSourc
 	ts := config.TokenSource(ctx)
 
 	// cache the token source
-	d.ConnectionManager.Cache.Set(cacheKey, ts)
+	if err := d.ConnectionCache.Set(ctx, cacheKey, ts); err != nil {
+		plugin.Logger(ctx).Warn("googledirectory.getTokenSource", "cache_key", cacheKey, "error", err)
+	}
 
 	return ts, nil
 }
